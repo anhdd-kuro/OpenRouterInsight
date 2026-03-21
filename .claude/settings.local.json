@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3:*)",
+      "Bash(xcodebuild:*)",
+      "Bash(qlmanage:*)",
+      "Bash(ICON_DIR=\"/Users/ainn/Documents/kuro/tools/OpenRouterCreditMenuBar/OpenRouterCreditMenuBar/Assets.xcassets/AppIcon.appiconset\":*)",
+      "Bash(SRC=\"/tmp/openrouter_app_icon.svg.png\")",
+      "Bash(__NEW_LINE_bcf7a4ea3b79592e__ for size in 16 32 64 128 256 512 1024)",
+      "Bash(do)",
+      "Bash(sips:*)",
+      "Bash(SRC=\"/tmp/icon_transparent.png\")",
+      "Bash(__NEW_LINE_17920c8efc73cf45__ for size in 16 32 64 128 256 512 1024)",
+      "Bash(magick:*)",
+      "Bash(done)",
+      "Bash(__NEW_LINE_17920c8efc73cf45__ ls -la \"$ICON_DIR/\")"
+    ]
+  }
+}

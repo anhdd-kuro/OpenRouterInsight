@@ -1,0 +1,156 @@
+version: '3'
+
+vars:
+    APP_NAME: OpenRouterCreditMenuBar
+    BUNDLE_ID: com.kttizz.OpenRouterCreditMenuBar
+    VERSION: v1.0.1
+    BUILD_DIR: ~/Library/Developer/Xcode/DerivedData
+    SCHEME: '{{.APP_NAME}}'
+    GITHUB_REPOSITORY: kittizz/OpenRouterCreditMenuBar
+
+tasks:
+    clean:
+        desc: Clean build artifacts
+        cmds:
+            - rm -rf ./build
+            - rm -rf ./release
+            - rm -rf ~/Library/Developer/Xcode/DerivedData/OpenRouterCreditMenuBar-*
+            - rm -rf ./OpenRouterCreditMenuBar.xcodeproj/project.xcworkspace/xcuserdata
+            - rm -rf ./OpenRouterCreditMenuBar.xcodeproj/xcuserdata
+            - rm -rf ~/Library/Developer/Xcode/DerivedData/*
+            - sleep 2
+            - echo "Cleaned build artifacts"
+
+    build:
+        desc: Build Release version
+        deps: [clean]
+        cmds:
+            - |
+                if pgrep -x "Xcode" > /dev/null; then
+                  echo "Xcode is running. Please close Xcode first."
+                  exit 1
+                fi
+            - rm -rf ./build
+            - mkdir -p ./build
+            - |
+                xcodebuild -scheme {{.SCHEME}} \
+                  -configuration Release \
+                  -derivedDataPath ./build \
+                  -destination "platform=macOS,arch=arm64" \
+                  clean build
+
+    build-universal:
+        desc: Build Universal app (arm64 + x86_64)
+        deps: [clean]
+        cmds:
+            - rm -rf ./build
+            - mkdir -p ./build
+            - |
+                xcodebuild -scheme {{.SCHEME}} \
+                  -configuration Release \
+                  -derivedDataPath ./build \
+                  -destination "platform=macOS,arch=arm64" \
+                  -archivePath ./build/{{.APP_NAME}}-arm64.xcarchive \
+                  archive
+            - |
+                xcodebuild -scheme {{.SCHEME}} \
+                  -configuration Release \
+                  -derivedDataPath ./build \
+                  -destination "platform=macOS,arch=x86_64" \
+                  -archivePath ./build/{{.APP_NAME}}-x86_64.xcarchive \
+                  archive
+            - |
+                xcodebuild -create-xcframework \
+                  -framework ./build/{{.APP_NAME}}-arm64.xcarchive/Products/Applications/{{.APP_NAME}}.app \
+                  -framework ./build/{{.APP_NAME}}-x86_64.xcarchive/Products/Applications/{{.APP_NAME}}.app \
+                  -output ./build/{{.APP_NAME}}.xcframework
+
+    export-app:
+        desc: Export Application from build
+        cmds:
+            - |
+                if [ ! -d "./build/Build/Products/Release/{{.APP_NAME}}.app" ]; then
+                  echo "Build not found. Running build first..."
+                  task build
+                fi
+            - mkdir -p ./release
+            - cp -R "./build/Build/Products/Release/{{.APP_NAME}}.app" "./release/"
+            - echo "Exported {{.APP_NAME}}.app to ./release/"
+        generates:
+            - ./release/{{.APP_NAME}}.app
+
+    create-dmg:
+        desc: Create DMG distribution package
+        deps: [export-app]
+        vars:
+            DMG_NAME: '{{.APP_NAME}}_{{.VERSION}}.dmg'
+        cmds:
+            - rm -f ./release/{{.DMG_NAME}}
+            - hdiutil create -volname "{{.APP_NAME}}" -srcfolder "./release/{{.APP_NAME}}.app" -ov -format UDZO "./release/{{.DMG_NAME}}"
+            - echo "Created DMG{{":"}} ./release/{{.DMG_NAME}}"
+        generates:
+            - ./release/{{.APP_NAME}}_{{.VERSION}}.dmg
+
+    create-zip:
+        desc: Create ZIP distribution package
+        deps: [export-app]
+        vars:
+            ZIP_NAME: '{{.APP_NAME}}_{{.VERSION}}.zip'
+        cmds:
+            - cd ./release && zip -r {{.ZIP_NAME}} {{.APP_NAME}}.app
+            - echo "Created ZIP{{":"}} ./release/{{.ZIP_NAME}}"
+        generates:
+            - ./release/{{.APP_NAME}}_{{.VERSION}}.zip
+
+    package:
+        desc: Create both DMG and ZIP packages
+        deps: [create-dmg, create-zip]
+
+    github-release:
+        desc: Create GitHub release and upload assets
+        deps: [package]
+        vars:
+            REPO: '{{.GITHUB_REPOSITORY}}'
+        cmds:
+            - |
+                gh release create {{.VERSION}} \
+                  --title "{{.APP_NAME}} {{.VERSION}}" \
+                  --notes "Release {{.VERSION}}" \
+                  --repo {{.REPO}}
+            - |
+                gh release upload {{.VERSION}} \
+                  ./release/{{.APP_NAME}}_{{.VERSION}}.dmg \
+                  ./release/{{.APP_NAME}}_{{.VERSION}}.zip \
+                  --repo {{.REPO}}
+            - echo "Released {{.VERSION}} to GitHub!"
+
+    release:
+        deps: [build]
+        desc: Full release pipeline
+        cmds:
+            - task: github-release
+
+    check-deps:
+        desc: Check required dependencies
+        cmds:
+            - |
+                if ! command -v gh &> /dev/null; then
+                  echo "GitHub CLI not found. Install{{":"}} brew install gh"
+                  exit 1
+                fi
+            - |
+                if ! gh auth status &> /dev/null; then
+                  echo "Not authenticated with GitHub. Run{{":"}} gh auth login"
+                  exit 1
+                fi
+            - echo "All dependencies satisfied"
+
+    debug-info:
+        desc: Show debug information
+        cmds:
+            - echo "Xcode version:"
+            - xcodebuild -version
+            - echo "Available schemes:"
+            - xcodebuild -list
+            - echo "Available destinations:"
+            - xcodebuild -showdestinations -scheme {{.SCHEME}}
