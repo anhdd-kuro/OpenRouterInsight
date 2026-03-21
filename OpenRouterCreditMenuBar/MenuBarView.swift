@@ -796,14 +796,12 @@ struct MenuBarView: View {
 
     private func restartApplication() {
         let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/open")
-        process.arguments = [Bundle.main.bundleURL.path]
+        process.executableURL = URL(fileURLWithPath: "/bin/sh")
+        process.arguments = ["-c", "sleep 0.4; /usr/bin/open -n \"\(Bundle.main.bundlePath)\""]
 
         do {
             try process.run()
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                NSApplication.shared.terminate(nil)
-            }
+            NSApplication.shared.terminate(nil)
         } catch {
             AppLogger.shared.write("restart_failed", details: error.localizedDescription)
         }
