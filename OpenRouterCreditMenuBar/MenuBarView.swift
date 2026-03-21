@@ -56,35 +56,50 @@ struct MenuBarView: View {
     }
 
     private func sortKeyUtilizationButton(_ title: String, metric: KeyUtilizationSortMetric) -> some View {
-        Button {
-            if keyUtilizationSortMetric == metric {
-                keyUtilizationSortAscending.toggle()
-            } else {
-                keyUtilizationSortMetric = metric
-                keyUtilizationSortAscending = false
-            }
-        } label: {
+        let isSelected = keyUtilizationSortMetric == metric
+
+        return ZStack {
             HStack(spacing: 2) {
                 Text(title)
-                if keyUtilizationSortMetric == metric {
+                if isSelected {
                     Image(systemName: keyUtilizationSortAscending ? "arrow.up" : "arrow.down")
                         .font(.system(size: 8, weight: .bold))
                 }
             }
             .font(.caption2)
             .foregroundColor(.white.opacity(0.95))
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(isSelected ? primaryColor.opacity(0.45) : Color.white.opacity(0.14))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 6)
+                    .stroke(Color.white.opacity(isSelected ? 0.5 : 0.25), lineWidth: 1)
+            )
+            .allowsHitTesting(false)
+
+            Button {
+                if keyUtilizationSortMetric == metric {
+                    keyUtilizationSortAscending.toggle()
+                } else {
+                    keyUtilizationSortMetric = metric
+                    keyUtilizationSortAscending = false
+                }
+            } label: {
+                HStack(spacing: 2) {
+                    Text(title)
+                    if isSelected {
+                        Image(systemName: keyUtilizationSortAscending ? "arrow.up" : "arrow.down")
+                            .font(.system(size: 8, weight: .bold))
+                    }
+                }
+                .font(.caption2)
+                .foregroundColor(.white.opacity(0.95))
+            }
+            .buttonStyle(.plain)
         }
-        .buttonStyle(.plain)
-        .padding(.horizontal, 8)
-        .padding(.vertical, 4)
-        .background(
-            RoundedRectangle(cornerRadius: 6)
-                .fill(keyUtilizationSortMetric == metric ? primaryColor.opacity(0.45) : Color.white.opacity(0.14))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 6)
-                .stroke(Color.white.opacity(keyUtilizationSortMetric == metric ? 0.5 : 0.25), lineWidth: 1)
-        )
     }
 
     private var keyUtilizationSection: some View {
@@ -93,7 +108,7 @@ struct MenuBarView: View {
                 .font(.caption)
                 .foregroundColor(.secondary)
 
-            HStack(spacing: 4) {
+            HStack(spacing: 2) {
                 sortKeyUtilizationButton("Key", metric: .key)
                 sortKeyUtilizationButton("Used", metric: .used)
                 sortKeyUtilizationButton("Util", metric: .utilization)
@@ -678,54 +693,78 @@ struct MenuBarView: View {
     }
 
     private func modeButton(_ title: String, mode: UsageViewMode) -> some View {
-        Button(title) {
-            usageViewMode = mode
+        let isSelected = usageViewMode == mode
+
+        return ZStack {
+            Text(title)
+                .font(.caption2)
+                .foregroundColor(.white.opacity(0.95))
+                .padding(.horizontal, 10)
+                .padding(.vertical, 5)
+                .background(
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(isSelected ? primaryColor.opacity(0.45) : Color.white.opacity(0.14))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 6)
+                        .stroke(Color.white.opacity(isSelected ? 0.5 : 0.25), lineWidth: 1)
+                )
+                .allowsHitTesting(false)
+
+            Button(title) {
+                usageViewMode = mode
+            }
+            .buttonStyle(.plain)
+            .font(.caption2)
+            .foregroundColor(.white.opacity(0.95))
         }
-        .buttonStyle(.plain)
-        .font(.caption2)
-        .foregroundColor(.white.opacity(0.95))
-        .padding(.horizontal, 10)
-        .padding(.vertical, 5)
-        .background(
-            RoundedRectangle(cornerRadius: 6)
-                .fill(usageViewMode == mode ? primaryColor.opacity(0.45) : Color.white.opacity(0.14))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 6)
-                .stroke(Color.white.opacity(usageViewMode == mode ? 0.5 : 0.25), lineWidth: 1)
-        )
     }
 
     private func sortMetricButton(_ title: String, metric: ModelUsageSortMetric) -> some View {
-        Button {
-            if modelUsageSortMetric == metric {
-                modelUsageSortAscending.toggle()
-            } else {
-                modelUsageSortMetric = metric
-                modelUsageSortAscending = false
-            }
-        } label: {
+        let isSelected = modelUsageSortMetric == metric
+
+        return ZStack {
             HStack(spacing: 2) {
                 Text(title)
-                if modelUsageSortMetric == metric {
+                if isSelected {
                     Image(systemName: modelUsageSortAscending ? "arrow.up" : "arrow.down")
                         .font(.system(size: 8, weight: .bold))
                 }
             }
             .font(.caption2)
             .foregroundColor(.white.opacity(0.95))
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(isSelected ? primaryColor.opacity(0.45) : Color.white.opacity(0.14))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 6)
+                    .stroke(Color.white.opacity(isSelected ? 0.5 : 0.25), lineWidth: 1)
+            )
+            .allowsHitTesting(false)
+
+            Button {
+                if modelUsageSortMetric == metric {
+                    modelUsageSortAscending.toggle()
+                } else {
+                    modelUsageSortMetric = metric
+                    modelUsageSortAscending = false
+                }
+            } label: {
+                HStack(spacing: 2) {
+                    Text(title)
+                    if isSelected {
+                        Image(systemName: modelUsageSortAscending ? "arrow.up" : "arrow.down")
+                            .font(.system(size: 8, weight: .bold))
+                    }
+                }
+                .font(.caption2)
+                .foregroundColor(.white.opacity(0.95))
+            }
+            .buttonStyle(.plain)
         }
-        .buttonStyle(.plain)
-        .padding(.horizontal, 8)
-        .padding(.vertical, 4)
-        .background(
-            RoundedRectangle(cornerRadius: 6)
-                .fill(modelUsageSortMetric == metric ? primaryColor.opacity(0.45) : Color.white.opacity(0.14))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 6)
-                .stroke(Color.white.opacity(modelUsageSortMetric == metric ? 0.5 : 0.25), lineWidth: 1)
-        )
     }
 
     private func actionIconButton(systemName: String, tooltip: String, iconColor: Color = .primary, action: @escaping () -> Void) -> some View {
