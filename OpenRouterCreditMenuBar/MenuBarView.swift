@@ -58,7 +58,14 @@ struct MenuBarView: View {
     private func sortKeyUtilizationButton(_ title: String, metric: KeyUtilizationSortMetric) -> some View {
         let isSelected = keyUtilizationSortMetric == metric
 
-        return ZStack {
+        return Button {
+            if keyUtilizationSortMetric == metric {
+                keyUtilizationSortAscending.toggle()
+            } else {
+                keyUtilizationSortMetric = metric
+                keyUtilizationSortAscending = false
+            }
+        } label: {
             HStack(spacing: 2) {
                 Text(title)
                 if isSelected {
@@ -78,28 +85,9 @@ struct MenuBarView: View {
                 RoundedRectangle(cornerRadius: 6)
                     .stroke(Color.white.opacity(isSelected ? 0.5 : 0.25), lineWidth: 1)
             )
-            .allowsHitTesting(false)
-
-            Button {
-                if keyUtilizationSortMetric == metric {
-                    keyUtilizationSortAscending.toggle()
-                } else {
-                    keyUtilizationSortMetric = metric
-                    keyUtilizationSortAscending = false
-                }
-            } label: {
-                HStack(spacing: 2) {
-                    Text(title)
-                    if isSelected {
-                        Image(systemName: keyUtilizationSortAscending ? "arrow.up" : "arrow.down")
-                            .font(.system(size: 8, weight: .bold))
-                    }
-                }
-                .font(.caption2)
-                .foregroundColor(.white.opacity(0.95))
-            }
-            .buttonStyle(.plain)
         }
+        .buttonStyle(.plain)
+        .contentShape(RoundedRectangle(cornerRadius: 6))
     }
 
     private var keyUtilizationSection: some View {
@@ -290,6 +278,10 @@ struct MenuBarView: View {
 
                 actionIconButton(systemName: "gearshape", tooltip: "Settings") {
                     NotificationCenter.default.post(name: .openSettingsRequested, object: nil)
+                }
+
+                actionIconButton(systemName: "arrow.clockwise.circle", tooltip: "Restart") {
+                    restartApplication()
                 }
 
                 actionIconButton(systemName: "power", tooltip: "Quit", iconColor: .red) {
@@ -695,7 +687,9 @@ struct MenuBarView: View {
     private func modeButton(_ title: String, mode: UsageViewMode) -> some View {
         let isSelected = usageViewMode == mode
 
-        return ZStack {
+        return Button {
+            usageViewMode = mode
+        } label: {
             Text(title)
                 .font(.caption2)
                 .foregroundColor(.white.opacity(0.95))
@@ -709,21 +703,22 @@ struct MenuBarView: View {
                     RoundedRectangle(cornerRadius: 6)
                         .stroke(Color.white.opacity(isSelected ? 0.5 : 0.25), lineWidth: 1)
                 )
-                .allowsHitTesting(false)
-
-            Button(title) {
-                usageViewMode = mode
-            }
-            .buttonStyle(.plain)
-            .font(.caption2)
-            .foregroundColor(.white.opacity(0.95))
         }
+        .buttonStyle(.plain)
+        .contentShape(RoundedRectangle(cornerRadius: 6))
     }
 
     private func sortMetricButton(_ title: String, metric: ModelUsageSortMetric) -> some View {
         let isSelected = modelUsageSortMetric == metric
 
-        return ZStack {
+        return Button {
+            if modelUsageSortMetric == metric {
+                modelUsageSortAscending.toggle()
+            } else {
+                modelUsageSortMetric = metric
+                modelUsageSortAscending = false
+            }
+        } label: {
             HStack(spacing: 2) {
                 Text(title)
                 if isSelected {
@@ -743,28 +738,9 @@ struct MenuBarView: View {
                 RoundedRectangle(cornerRadius: 6)
                     .stroke(Color.white.opacity(isSelected ? 0.5 : 0.25), lineWidth: 1)
             )
-            .allowsHitTesting(false)
-
-            Button {
-                if modelUsageSortMetric == metric {
-                    modelUsageSortAscending.toggle()
-                } else {
-                    modelUsageSortMetric = metric
-                    modelUsageSortAscending = false
-                }
-            } label: {
-                HStack(spacing: 2) {
-                    Text(title)
-                    if isSelected {
-                        Image(systemName: modelUsageSortAscending ? "arrow.up" : "arrow.down")
-                            .font(.system(size: 8, weight: .bold))
-                    }
-                }
-                .font(.caption2)
-                .foregroundColor(.white.opacity(0.95))
-            }
-            .buttonStyle(.plain)
         }
+        .buttonStyle(.plain)
+        .contentShape(RoundedRectangle(cornerRadius: 6))
     }
 
     private func actionIconButton(systemName: String, tooltip: String, iconColor: Color = .primary, action: @escaping () -> Void) -> some View {
@@ -816,6 +792,21 @@ struct MenuBarView: View {
     private func moveSlideRight() {
         guard !creditManager.apiKeyUsages.isEmpty else { return }
         selectedKeyIndex = (selectedKeyIndex + 1) % creditManager.apiKeyUsages.count
+    }
+
+    private func restartApplication() {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/open")
+        process.arguments = [Bundle.main.bundleURL.path]
+
+        do {
+            try process.run()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                NSApplication.shared.terminate(nil)
+            }
+        } catch {
+            AppLogger.shared.write("restart_failed", details: error.localizedDescription)
+        }
     }
 
     private func usageRow(title: String, value: Double) -> some View {
