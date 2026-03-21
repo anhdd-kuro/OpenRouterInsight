@@ -34,6 +34,11 @@ class OpenRouterCreditManager: ObservableObject {
             }
         }
     }
+    @Published var isBackdropBlurEnabled: Bool = true {
+        didSet {
+            userDefaults.set(isBackdropBlurEnabled, forKey: "ui_backdrop_blur_enabled")
+        }
+    }
 
     private let userDefaults = UserDefaults.standard
     private var refreshTimer: Timer?
@@ -144,6 +149,9 @@ class OpenRouterCreditManager: ObservableObject {
         }
         if userDefaults.object(forKey: "alert_low_credit_enabled") != nil {
             isLowCreditAlertEnabled = userDefaults.bool(forKey: "alert_low_credit_enabled")
+        }
+        if userDefaults.object(forKey: "ui_backdrop_blur_enabled") != nil {
+            isBackdropBlurEnabled = userDefaults.bool(forKey: "ui_backdrop_blur_enabled")
         }
 
         if isKeyAnomalyAlertEnabled || isLowCreditAlertEnabled {

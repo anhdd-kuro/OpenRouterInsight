@@ -55,6 +55,8 @@ struct SettingsView: View {
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
+
+                Toggle("Enable backdrop blur", isOn: $creditManager.isBackdropBlurEnabled)
             }
 
             Section("API Configuration") {

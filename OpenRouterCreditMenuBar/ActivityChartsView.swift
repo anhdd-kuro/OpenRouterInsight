@@ -34,6 +34,7 @@ enum ActivityChartStyle: String, CaseIterable, Identifiable {
 }
 
 struct ActivityChartsView: View {
+    @EnvironmentObject var creditManager: OpenRouterCreditManager
     let entries: [ActivityEntry]
     @Binding var selectedTimeFilter: ActivityTimeFilter
     @Binding var selectedModelFilter: String
@@ -133,7 +134,11 @@ struct ActivityChartsView: View {
             if let tooltip {
                 ActivityGlobalTooltipView(tooltip: tooltip)
                     .padding(6)
-                    .background(.ultraThinMaterial)
+                    .background {
+                        if creditManager.isBackdropBlurEnabled {
+                            Rectangle().fill(.ultraThinMaterial)
+                        }
+                    }
                     .background(Color.black.opacity(0.52))
                     .clipShape(RoundedRectangle(cornerRadius: 8))
                     .overlay(
