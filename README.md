@@ -13,7 +13,9 @@ It is built for developers who want fast visibility into spend, key activity, an
 
 ## Screenshots
 
-Screenshots are available in `screenshots/`.
+![Open-router Insight app preview](./app-preview.png)
+
+More screenshots are available in `screenshots/`.
 
 ## Requirements
 
