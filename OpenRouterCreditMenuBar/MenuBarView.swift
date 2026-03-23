@@ -764,17 +764,20 @@ struct MenuBarView: View {
     }
 
     private func sliderArrowButton(systemName: String, isHovered: Binding<Bool>, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
+        Button {
+            action()
+        } label: {
             Image(systemName: systemName)
                 .font(.caption)
                 .frame(width: 22, height: 22)
+                .background(
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(Color.white.opacity(isHovered.wrappedValue ? 0.6 : 0.5))
+                )
         }
         .buttonStyle(.plain)
         .foregroundColor(.primary)
-        .background(
-            RoundedRectangle(cornerRadius: 6)
-                .fill(Color.white.opacity(isHovered.wrappedValue ? 0.6 : 0.5))
-        )
+        .contentShape(RoundedRectangle(cornerRadius: 6))
         .onHover { hovering in
             isHovered.wrappedValue = hovering
         }
